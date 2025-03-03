@@ -1,0 +1,40 @@
+name: Ansible Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Python for Ansible
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # Step 3: Install dependencies
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+
+      # Step 4: Add SSH private key
+      - name: Add SSH private key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa_terraform
+          chmod 600 ~/.ssh/id_rsa_terraform
+          ssh-keyscan -H $(grep ansible_host ansible-playbooks/inventory.ini | awk '{print $2}') >> ~/.ssh/known_hosts
+
+      # Step 5: Run the Ansible playbook
+      - name: Run Ansible playbook
+        run: |
+          ansible-playbook -i ansible-playbooks/inventory.ini ansible-playbooks/setup.yml
