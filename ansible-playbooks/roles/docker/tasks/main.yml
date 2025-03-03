@@ -1,0 +1,13 @@
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+- name: Start and enable Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+- name: Pull the Nginx Docker image
+  docker_image:
+    name: nginx
+    source: pull
