@@ -32,7 +32,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa_terraform
           chmod 600 ~/.ssh/id_rsa_terraform
-          ssh-keyscan -H $(grep ansible_host ansible-playbooks/inventory.ini | awk '{print $2}') >> ~/.ssh/known_hosts
+          grep ansible_host ansible-playbooks/inventory.ini | awk '{print $2}' | awk -F'=' '{print $2}' | xargs -n1 ssh-keyscan -H >> ~/.ssh/known_hosts
 
       # Step 5: Run the Ansible playbook
       - name: Run Ansible playbook
