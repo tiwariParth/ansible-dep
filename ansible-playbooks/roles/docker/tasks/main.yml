@@ -1,13 +1,40 @@
+---
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
 - name: Install Docker
   apt:
-    name: docker.io
+    name: docker-ce
     state: present
+
 - name: Start and enable Docker service
   service:
     name: docker
     state: started
     enabled: yes
-- name: Pull the Nginx Docker image
+
+- name: Pull the sample web app Docker image
   docker_image:
-    name: nginx
+    name: hashicorp/http-echo
+    tag: latest
     source: pull
+
+- name: Run the sample web app container
+  docker_container:
+    name: webapp
+    image: hashicorp/http-echo
+    command: ["-text", "Hello, Ansible!"]
+    ports:
+      - "8080:5678"
+    state: started
