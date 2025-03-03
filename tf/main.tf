@@ -111,7 +111,7 @@ resource "aws_security_group" "allow_ssh_http_https" {
 
 
 resource "aws_instance" "ubuntu_instance" {
-  count                       = 3
+  count                       = 2
   ami                         = "ami-079605091ab721dac"
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.public_subnet.id
@@ -130,17 +130,17 @@ resource "aws_instance" "ubuntu_instance" {
 }
 
 resource "local_file" "ansible_inventory" {
-  filename = "./inventory.ini"
+  filename = "${path.module}/../ansible-playbooks/inventory.ini"
 
   content = <<EOT
-  [webservers]
-  %{ for i, ip in aws_instance.ubuntu_instance[*].public_ip ~}
-  server${i + 1} ansible_host=${ip} ansible_user=ubuntu
-  %{ endfor ~}
+[webservers]
+%{ for i, ip in aws_instance.ubuntu_instance[*].public_ip ~}
+server${i + 1} ansible_host=${ip} ansible_user=ubuntu
+%{ endfor ~}
 
-  [all:vars]
-  ansible_ssh_private_key_file=~/.ssh/id_rsa_terraform
-  EOT
+[all:vars]
+ansible_ssh_private_key_file=/home/partht/.ssh/id_rsa_terraform
+EOT
 }
 
 
